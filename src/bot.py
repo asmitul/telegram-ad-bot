@@ -5,6 +5,7 @@ from telegram.ext import (
     ApplicationBuilder,
     PicklePersistence,
 )
+from datetime import time
 
 from src.api.register_handlers import register_handlers
 from src.repositories.data_repository import DataRepository
@@ -29,7 +30,8 @@ def main(telegram_token: str):
     register_handlers(application)
     
     job_queue = application.job_queue
-    job_queue.run_repeating(send_random_ad, interval=600)
+    for hour in range(24):
+        job_queue.run_daily(send_random_ad, time=time(hour=hour, minute=0))
 
     try:
         application.run_polling(
