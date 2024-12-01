@@ -4,6 +4,7 @@ from telegram.ext import Application
 from src.models.ad import Advertisement
 from src.models.user import User
 from src.models.chat_group import ChatGroup  # 更新导入路径
+from src.models.banned_word import BannedWord
 import uuid
 from datetime import datetime
 
@@ -24,6 +25,8 @@ class DataRepository:
             self.app.bot_data['users'] = {}
         if 'ads' not in self.app.bot_data:
             self.app.bot_data['ads'] = {}
+        if 'banned_words' not in self.app.bot_data:
+            self.app.bot_data['banned_words'] = []
     
     # 广告相关方法
     async def save_ad(self, ad: Advertisement) -> bool:
@@ -167,4 +170,38 @@ class DataRepository:
             return True
         except Exception as e:
             log_error(e, f"设置目标频道失败: {channel_id}")
+            return False
+    
+    async def save_banned_word(self, banned_word: BannedWord) -> bool:
+        """保存禁言词"""
+        try:
+            banned_words = self.app.bot_data.get('banned_words', [])
+            banned_words.append(banned_word.to_dict())
+            self.app.bot_data['banned_words'] = banned_words
+            return True
+        except Exception as e:
+            log_error(e, "保存禁言词失败")
+            return False
+    
+    async def get_all_banned_words(self) -> List[BannedWord]:
+        """获取所有禁言词"""
+        try:
+            banned_words = self.app.bot_data.get('banned_words', [])
+            return [BannedWord.from_dict(word) for word in banned_words]
+        except Exception as e:
+            log_error(e, "获取禁言词列表失败")
+            return []
+    
+    async def delete_banned_word(self, word: str) -> bool:
+        """删除禁言词"""
+        try:
+            banned_words = self.app.bot_data.get('banned_words', [])
+            original_length = len(banned_words)
+            banned_words = [w for w in banned_words if w['word'] != word]
+            if len(banned_words) == original_length:
+                return False
+            self.app.bot_data['banned_words'] = banned_words
+            return True
+        except Exception as e:
+            log_error(e, "删除禁言词失败")
             return False

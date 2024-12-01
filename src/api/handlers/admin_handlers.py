@@ -178,6 +178,10 @@ class AdminHandler(BaseHandler):
             "• /add_ad - 添加新广告\n"
             "• /list_ads - 查看所有广告\n"
             "• /delete_ad - 删除指定广告\n\n"
+            "禁言管理命令:\n"
+            "• /add_banned_word - 添加禁言词\n"
+            "• /list_banned_words - 查看所有禁言词\n"
+            "• /delete_banned_word - 删除禁言词\n\n"
             "其他命令:\n"
             "• /help - 显示此帮助信息"
         )

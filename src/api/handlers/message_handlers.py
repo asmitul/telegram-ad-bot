@@ -7,11 +7,13 @@ from src.api.handlers.base_handler import BaseHandler
 from src.utils.logger import log_info, log_error, log_warning
 from datetime import datetime
 import asyncio
+from src.services.banned_word_service import BannedWordService
 
 class MessageHandler(BaseHandler):
     def __init__(self, application):
         super().__init__(application)
         self.message_service = MessageService(self.repository)
+        self.banned_word_service = BannedWordService(self.repository)
 
     # handle_bot_error
     async def handle_bot_error(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -40,11 +42,28 @@ class MessageHandler(BaseHandler):
     
     async def handle_new_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """处理新消息"""
-        if not update.effective_chat or not update.effective_user:
+        if not update.effective_chat or not update.effective_user or not update.message or not update.message.text:
             return
         
         chat = update.effective_chat
         user = update.effective_user
+        
+        # 检查消息是否包含禁言词
+        if await self.banned_word_service.check_message(update.message.text):
+            try:
+                # 删除包含禁言词的消息
+                await update.message.delete()
+                # 发送警告消息
+                warning = await context.bot.send_message(
+                    chat_id=chat.id,
+                    text=f"⚠️ {user.first_name}，您的消息包含禁用词，已被删除。"
+                )
+                # 设置定时删除警告消息
+                asyncio.create_task(self._delete_message_later(warning, 10))
+                return
+            except Exception as e:
+                log_error(e, "处理禁言消息失败")
+        
         log_info(f"收到群组 {chat.title} ({chat.id}) 的消息")
         
         # 先获取现有的群组信息

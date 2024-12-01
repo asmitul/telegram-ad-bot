@@ -7,6 +7,7 @@ from telegram.ext import (
 from src.api.handlers.admin_handlers import AdminHandler
 from src.api.handlers.ad_handlers import AdHandler
 from src.api.handlers.message_handlers import MessageHandler as CustomMessageHandler
+from src.api.handlers.banned_word_handlers import BannedWordHandler
 
 def register_handlers(application: Application) -> None:
     """注册所有处理器"""
@@ -14,6 +15,7 @@ def register_handlers(application: Application) -> None:
     admin_handler = AdminHandler(application)
     ad_handler = AdHandler(application)
     message_handler = CustomMessageHandler(application)
+    banned_word_handler = BannedWordHandler(application)
 
     # 注册错误处理器
     application.add_error_handler(message_handler.handle_bot_error)
@@ -48,3 +50,8 @@ def register_handlers(application: Application) -> None:
 
     # 注册帮助命令
     application.add_handler(CommandHandler("help", admin_handler.handle_help_command))
+
+    # 注册禁言词命令
+    application.add_handler(CommandHandler("add_banned_word", banned_word_handler.handle_add_banned_word))
+    application.add_handler(CommandHandler("list_banned_words", banned_word_handler.handle_list_banned_words))
+    application.add_handler(CommandHandler("delete_banned_word", banned_word_handler.handle_delete_banned_word))
