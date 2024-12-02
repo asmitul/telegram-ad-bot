@@ -51,14 +51,11 @@ class MessageHandler(BaseHandler):
         # 检查消息是否包含禁言词
         if await self.banned_word_service.check_message(update.message.text):
             try:
-                # 删除包含禁言词的消息
                 await update.message.delete()
-                # 发送警告消息
                 warning = await context.bot.send_message(
                     chat_id=chat.id,
                     text=f"⚠️ {user.first_name}，您的消息包含禁用词，已被删除。"
                 )
-                # 设置定时删除警告消息
                 asyncio.create_task(self._delete_message_later(warning, 10))
                 return
             except Exception as e:
@@ -66,16 +63,13 @@ class MessageHandler(BaseHandler):
         
         log_info(f"收到群组 {chat.title} ({chat.id}) 的消息")
         
-        # 先获取现有的群组信息
+        # 获取并更新群组信息
         existing_group = await self.repository.get_group(chat.id)
-        
         if existing_group:
-            # 如果群组存在，只更新基本信息，保留 is_ad_group 状态
             existing_group.title = chat.title
             existing_group.type = chat.type
             group = existing_group
         else:
-            # 如果是新群组，创建新的记录
             group = ChatGroup(
                 id=chat.id,
                 title=chat.title,
@@ -87,20 +81,30 @@ class MessageHandler(BaseHandler):
         
         # 如果是广告群，检查用户是否关注了目标频道
         if group.is_ad_group and update.message:
+            settings = self.repository.app.bot_data.get('settings', {})
+            target_channel_id = settings.get('target_channel_id')
+            
+            if not target_channel_id:
+                log_warning("未设置目标频道ID")
+                return
+            
+            log_info(f"检查用户 {user.id} 的频道订阅状态，目标频道: {target_channel_id}")
+            
             is_subscribed = await self.message_service.check_channel_subscription(user.id, context.bot)
             if not is_subscribed:
-                # 获取目标频道信息
-                settings = self.repository.app.bot_data.get('settings', {})
-                target_channel_id = settings.get('target_channel_id')
-                
                 try:
-                    # 获取频道信息
-                    channel = await context.bot.get_chat(target_channel_id)
-                    channel_username = channel.username
+                    # 尝试获取频道信息
+                    try:
+                        channel = await context.bot.get_chat(target_channel_id)
+                        log_info(f"成功获取频道信息: {channel.title} ({channel.id})")
+                    except Exception as e:
+                        log_error(e, f"获取频道信息失败: {target_channel_id}")
+                        # 如果获取频道信息失败，仍然尝试创建链接
+                        channel = None
                     
                     # 创建频道链接
-                    if channel_username:
-                        channel_link = f"https://t.me/{channel_username}"
+                    if channel and channel.username:
+                        channel_link = f"https://t.me/{channel.username}"
                     else:
                         # 移除 -100 前缀（如果存在）
                         clean_channel_id = str(target_channel_id)
