@@ -173,7 +173,9 @@ class AdminHandler(BaseHandler):
             "• /admin - 初始化管理员或添加新管理员\n"
             "• /remove_admin - 移除管理员\n"
             "• /set_target - 设置目标群组\n"
-            "• /set_target_channel - 设置目标频道\n\n"
+            "• /show_target - 显示当前目标群组\n"
+            "• /set_target_channel - 设置目标频道\n"
+            "• /show_target_channel - 显示当前目标频道\n\n"
             "广告管理命令:\n"
             "• /add_ad - 添加新广告\n"
             "• /list_ads - 查看所有广告\n"
@@ -187,3 +189,59 @@ class AdminHandler(BaseHandler):
         )
         
         await update.message.reply_text(help_text)
+
+    @admin_required
+    async def handle_show_target(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """处理 /show_target 命令"""
+        try:
+            target_group_id = await self.repository.get_target_group_id()
+            if not target_group_id:
+                await self.send_error_message(update, "未设置目标群组")
+                return
+            
+            # 获取群组信息
+            group = await self.repository.get_group(target_group_id)
+            if group:
+                await update.message.reply_text(
+                    f"当前目标群组信息：\n"
+                    f"• ID: {group.id}\n"
+                    f"• 标题: {group.title}\n"
+                    f"• 类型: {group.type}\n"
+                    f"• 是否为广告群: {'是' if group.is_ad_group else '否'}"
+                )
+            else:
+                await update.message.reply_text(
+                    f"📍 当前目标群组ID：{target_group_id}\n"
+                    "⚠️ 注意：未找到该群组的详细信息"
+                )
+        except Exception as e:
+            log_error(e, "获取目标群组信息失败")
+            await self.send_error_message(update, "获取目标群组信息失败")
+
+    @admin_required
+    async def handle_show_target_channel(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """处理 /show_target_channel 命令"""
+        try:
+            target_channel_id = await self.repository.get_target_channel_id()
+            if not target_channel_id:
+                await self.send_error_message(update, "未设置目标频道")
+                return
+            
+            try:
+                # 尝试获取频道信息
+                channel = await context.bot.get_chat(target_channel_id)
+                await update.message.reply_text(
+                    f"📍 当前目标频道信息：\n"
+                    f"• ID: {channel.id}\n"
+                    f"• 标题: {channel.title}\n"
+                    f"• 类型: {channel.type}\n"
+                    f"• 用户名: @{channel.username or '无'}"
+                )
+            except Exception as e:
+                await update.message.reply_text(
+                    f"📍 当前目标频道ID：{target_channel_id}\n"
+                    "⚠️ 注意：无法获取该频道的详细信息"
+                )
+        except Exception as e:
+            log_error(e, "获取目标频道信息失败")
+            await self.send_error_message(update, "获取目标频道信息失败")

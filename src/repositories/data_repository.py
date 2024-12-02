@@ -205,3 +205,21 @@ class DataRepository:
         except Exception as e:
             log_error(e, "删除禁言词失败")
             return False
+    
+    async def get_target_group_id(self) -> Optional[int]:
+        """获取目标群组ID"""
+        try:
+            settings = self.app.bot_data.get('settings', {})
+            return settings.get('target_group_id')
+        except Exception as e:
+            log_error(e, "获取目标群组ID失败")
+            return None
+    
+    async def get_target_channel_id(self) -> Optional[int]:
+        """获取目标频道ID"""
+        try:
+            settings = self.app.bot_data.get('settings', {})
+            return settings.get('target_channel_id')
+        except Exception as e:
+            log_error(e, "获取目标频道ID失败")
+            return None
