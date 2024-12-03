@@ -81,6 +81,11 @@ class MessageHandler(BaseHandler):
         
         # 如果是广告群，检查用户是否关注了目标频道
         if group.is_ad_group and update.message:
+            # 先检查频道验证功能是否启用
+            verification_enabled = await self.repository.get_channel_verification_status()
+            if not verification_enabled:
+                return
+
             settings = self.repository.app.bot_data.get('settings', {})
             target_channel_id = settings.get('target_channel_id')
             

@@ -223,3 +223,24 @@ class DataRepository:
         except Exception as e:
             log_error(e, "获取目标频道ID失败")
             return None
+    
+    async def set_channel_verification(self, enabled: bool) -> bool:
+        """设置频道验证开关"""
+        try:
+            settings = self.app.bot_data.get('settings', {})
+            settings['channel_verification_enabled'] = enabled
+            self.app.bot_data['settings'] = settings
+            log_info(f"频道验证功能已{'启用' if enabled else '禁用'}")
+            return True
+        except Exception as e:
+            log_error(e, "设置频道验证状态失败")
+            return False
+    
+    async def get_channel_verification_status(self) -> bool:
+        """获取频道验证开关状态"""
+        try:
+            settings = self.app.bot_data.get('settings', {})
+            return settings.get('channel_verification_enabled', True)  # 默认启用
+        except Exception as e:
+            log_error(e, "获取频道验证状态失败")
+            return True  # 出错时默认启用

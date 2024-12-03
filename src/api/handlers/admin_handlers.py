@@ -175,7 +175,8 @@ class AdminHandler(BaseHandler):
             "• /set_target - 设置目标群组\n"
             "• /show_target - 显示当前目标群组\n"
             "• /set_target_channel - 设置目标频道\n"
-            "• /show_target_channel - 显示当前目标频道\n\n"
+            "• /show_target_channel - 显示当前目标频道\n"
+            "• /toggle_verification - 开启/关闭频道验证功能\n\n"
             "广告管理命令:\n"
             "• /add_ad - 添加新广告\n"
             "• /list_ads - 查看所有广告\n"
@@ -245,3 +246,21 @@ class AdminHandler(BaseHandler):
         except Exception as e:
             log_error(e, "获取目标频道信息失败")
             await self.send_error_message(update, "获取目标频道信息失败")
+
+    @admin_required
+    async def handle_toggle_verification(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """处理 /toggle_verification 命令"""
+        try:
+            current_status = await self.repository.get_channel_verification_status()
+            new_status = not current_status
+            
+            if await self.repository.set_channel_verification(new_status):
+                status_text = "启用" if new_status else "禁用"
+                await self.send_success_message(
+                    update,
+                    f"已{status_text}频道验证功能"
+                )
+            else:
+                await self.send_error_message(update, "切换频道验证状态失败")
+        except Exception as e:
+            await self.send_error_message(update, f"操作失败: {str(e)}")

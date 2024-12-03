@@ -27,6 +27,10 @@ def register_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("set_target_channel", admin_handler.handle_set_target_channel))
     application.add_handler(CommandHandler("show_target", admin_handler.handle_show_target))
     application.add_handler(CommandHandler("show_target_channel", admin_handler.handle_show_target_channel))
+    application.add_handler(CommandHandler(
+        "toggle_verification", 
+        admin_handler.handle_toggle_verification
+    ))
     
     # 注册广告命令
     application.add_handler(CommandHandler("add_ad", ad_handler.handle_add_ad))
