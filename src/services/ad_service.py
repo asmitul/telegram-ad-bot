@@ -62,3 +62,20 @@ class AdService:
         except Exception as e:
             log_error(e, "获取随机广告失败")
             return None
+        
+    async def get_next_ad(self) -> Optional[Advertisement]:
+        """按顺序获取下一个广告（轮询方式）"""
+        try:
+            ads = await self.repository.get_all_ads()
+            if not ads:
+                return None
+                
+            last_index = self.repository.app.bot_data.get('last_ad_index', -1)
+            next_index = (last_index + 1) % len(ads)
+            self.repository.app.bot_data['last_ad_index'] = next_index
+            
+            log_info(f"轮询广告: 索引 {next_index + 1}/{len(ads)}")
+            return ads[next_index]
+        except Exception as e:
+            log_error(e, "获取轮询广告失败")
+            return None

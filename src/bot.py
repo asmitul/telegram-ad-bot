@@ -10,7 +10,7 @@ from datetime import time
 from src.api.register_handlers import register_handlers
 from src.repositories.data_repository import DataRepository
 from src.utils.logger import log_error, log_info
-from src.services.scheduler_service import send_random_ad
+from src.services.scheduler_service import send_next_ad
 from src.services.admin_service import AdminService
 
 def main(telegram_token: str):
@@ -31,7 +31,7 @@ def main(telegram_token: str):
     
     job_queue = application.job_queue
     for hour in range(24):
-        job_queue.run_daily(send_random_ad, time=time(hour=hour, minute=0))
+        job_queue.run_daily(send_next_ad, time=time(hour=hour, minute=0))
 
     try:
         application.run_polling(
