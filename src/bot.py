@@ -30,7 +30,7 @@ def main(telegram_token: str):
     register_handlers(application)
     
     job_queue = application.job_queue
-    for hour in range(24):
+    for hour in range(0, 24, 2):
         job_queue.run_daily(send_next_ad, time=time(hour=hour, minute=0))
 
     try:
