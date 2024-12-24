@@ -27,6 +27,7 @@ pip install -r requirements.txt
 创建 `.env` 文件：
 ```env
 TELEGRAM_BOT_TOKEN=your_bot_token
+BOT_NAME=your_bot_name
 ```
 
 4. 运行机器人
