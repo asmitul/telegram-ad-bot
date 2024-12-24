@@ -1,8 +1,8 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes
 from src.services.ad_service import AdService
 from src.api.handlers.base_handler import BaseHandler, admin_required
-from src.utils.logger import log_info, log_error
+from src.utils.logger import log_telegram
 
 class AdHandler(BaseHandler):
     def __init__(self, application):
@@ -21,6 +21,7 @@ class AdHandler(BaseHandler):
             "广告语\n"
             "按钮文字|按钮链接"
         )
+        log_telegram(f"User {update.message.from_user.id} started adding an ad")
     
     async def handle_ad_media(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """处理广告媒体和文本"""
@@ -82,8 +83,10 @@ class AdHandler(BaseHandler):
                 
                 if ad:
                     await self.send_success_message(update, "广告添加成功！")
+                    log_telegram(f"User {update.message.from_user.id} added an ad successfully")
                 else:
                     await self.send_error_message(update, "广告添加失败")
+                    log_telegram(f"User {update.message.from_user.id} failed to add an ad")
                     
             except ValueError as e:
                 await self.send_error_message(
@@ -124,6 +127,7 @@ class AdHandler(BaseHandler):
                 f"创建时间: {ad.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
             )
             await update.message.reply_text(message)
+            log_telegram(f"User {update.message.from_user.id} listed all ads")
             
         # 添加使用说明
         usage = (
@@ -132,7 +136,7 @@ class AdHandler(BaseHandler):
             "例如：/delete_ad 550e8400-e29b-41d4-a716-446655440000"
         )
         await update.message.reply_text(usage)
-    
+        log_telegram(f"User {update.message.from_user.id} listed all ads")
     @admin_required
     async def handle_delete_ad(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """处理 /delete_ad 命令"""
@@ -143,6 +147,7 @@ class AdHandler(BaseHandler):
                 "用法: /delete_ad <ad_id>\n"
                 "提示：使用 /list_ads 查看所有广告及其ID"
             )
+            log_telegram(f"User {update.message.from_user.id} failed to delete an ad")
             return
             
         try:
@@ -152,6 +157,7 @@ class AdHandler(BaseHandler):
                     update,
                     f"已删除广告 {ad_id}"
                 )
+                log_telegram(f"User {update.message.from_user.id} deleted an ad successfully")
             else:
                 await self.send_error_message(
                     update,

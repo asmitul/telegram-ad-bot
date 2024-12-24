@@ -1,7 +1,7 @@
 # src/bot.py
+import os
 from telegram import Update
 from telegram.ext import (
-    Application,
     ApplicationBuilder,
     PicklePersistence,
 )
@@ -9,12 +9,16 @@ from datetime import time
 
 from src.api.register_handlers import register_handlers
 from src.repositories.data_repository import DataRepository
-from src.utils.logger import log_error, log_info
+from src.utils.logger import log_info
 from src.services.scheduler_service import send_next_ad
-from src.services.admin_service import AdminService
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BOT_NAME = os.getenv("BOT_NAME")
 
 def main(telegram_token: str):
-    persistence = PicklePersistence(filepath="data/bot_database.pkl")
+    persistence = PicklePersistence(filepath=f"data/{BOT_NAME}.pkl")
     
     application = (
         ApplicationBuilder()

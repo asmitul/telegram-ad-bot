@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from src.services.admin_service import AdminService
 from src.api.handlers.base_handler import BaseHandler, admin_required
-from src.utils.logger import log_info, log_error
+from src.utils.logger import log_telegram, log_error
 from src.services.message_service import MessageService
 from src.models.chat_group import ChatGroup
 
@@ -66,6 +66,7 @@ class AdminHandler(BaseHandler):
         await update.message.reply_text(
             f"📋 管理员列表：\n{admin_list}"
         )
+        log_telegram(f"User {update.message.from_user.id} listed all admins")
     
     @admin_required
     async def handle_remove_admin(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
