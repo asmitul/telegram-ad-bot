@@ -31,6 +31,7 @@ def register_handlers(application: Application) -> None:
         "toggle_verification", 
         admin_handler.handle_toggle_verification
     ))
+    application.add_handler(CommandHandler("getid", admin_handler.handle_get_id))
     
     # 注册广告命令
     application.add_handler(CommandHandler("add_ad", ad_handler.handle_add_ad))

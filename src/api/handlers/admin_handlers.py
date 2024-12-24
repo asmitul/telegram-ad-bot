@@ -187,7 +187,8 @@ class AdminHandler(BaseHandler):
             "• /list_banned_words - 查看所有禁言词\n"
             "• /delete_banned_word - 删除禁言词\n\n"
             "其他命令:\n"
-            "• /help - 显示此帮助信息"
+            "• /help - 显示此帮助信息\n"
+            "• /getid - 获取当前群组ID"
         )
         
         await update.message.reply_text(help_text)
@@ -265,3 +266,19 @@ class AdminHandler(BaseHandler):
                 await self.send_error_message(update, "切换频道验证状态失败")
         except Exception as e:
             await self.send_error_message(update, f"操作失败: {str(e)}")
+
+    async def handle_get_id(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """处理 /getid 命令"""
+        if not update.effective_chat:
+            return
+        
+        chat_id = update.effective_chat.id
+        chat_type = update.effective_chat.type
+        chat_title = update.effective_chat.title if update.effective_chat.title else "私聊"
+        
+        await update.message.reply_text(
+            f"📝 群组信息：\n"
+            f"• ID: {chat_id}\n"
+            f"• 类型: {chat_type}\n"
+            f"• 标题: {chat_title}"
+        )
