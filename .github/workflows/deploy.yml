@@ -53,6 +53,7 @@ jobs:
           --restart unless-stopped \
           -v ${{ env.DATA_DIR }}:/app/data \
           -e TELEGRAM_BOT_TOKEN=${{ vars.TELEGRAM_BOT_TOKEN }} \
+          -e BOT_NAME=${{ vars.BOT_NAME }} \
           ${{ env.DOCKER_IMAGE }}
 
     - name: Cleanup old images
