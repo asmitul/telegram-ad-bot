@@ -33,7 +33,7 @@ jobs:
     - name: Ensure data directory exists
       run: |
         sudo mkdir -p ${{ env.DATA_DIR }}
-        sudo chown -R ${{ github.actor }}:${{ github.actor }} ${{ env.DATA_DIR }}
+        sudo chown -R $(whoami):$(whoami) ${{ env.DATA_DIR }}
 
     - name: Build Docker image
       run: |
