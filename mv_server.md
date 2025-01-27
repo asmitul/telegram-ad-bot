@@ -1,0 +1,1 @@
+scp -r /var/telegram-bot/data root@192.168.1.1:/var/telegram-bot/data
